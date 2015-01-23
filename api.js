@@ -67,14 +67,14 @@ function FlexHosts(param, dir) {
         })
       }
       else {
-        console.log("Unknown Command!");
+        Helper.Log.error("Unknown Command!");
       }
     });
 
     this.start();
   }
   else {
-    console.log("Your system has not been supported!");
+    Helper.Log.error("Your system has not been supported!");
     process.exit(0);
   }
 };
