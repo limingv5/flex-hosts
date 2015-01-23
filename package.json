@@ -1,0 +1,16 @@
+{
+  "name": "flex-hosts",
+  "version": "0.0.3",
+  "description": "hosts manager with DNS refresh",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "limingv5",
+  "license": "ISC",
+  "dependencies": {
+    "iconv-lite": "~0.4.0",
+    "is-utf8": "~0.2.0",
+    "mace": "~2.0.0"
+  }
+}
