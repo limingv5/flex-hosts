@@ -34,7 +34,7 @@ function FlexHosts(param, dir) {
       this.param = Helper.merge(JSON.parse(fsLib.readFileSync(confFile)), param);
     }
     catch (e) {
-      Helper.Log.error("Params Error!");
+      console.log("Params Error!");
       this.param = {};
     }
 
@@ -64,17 +64,17 @@ function FlexHosts(param, dir) {
       else if (sys.cmd.length == 2) {
         exec(sys.cmd[0], function() {
           exec(sys.cmd[1]);
-        })
+        });
       }
       else {
-        Helper.Log.error("Unknown Command!");
+        console.log("Unknown Command!");
       }
     });
 
     this.start();
   }
   else {
-    Helper.Log.error("Your system has not been supported!");
+    console.log("Your system has not been supported!");
     process.exit(0);
   }
 };
@@ -87,7 +87,7 @@ FlexHosts.prototype = {
     this.read();
 
     if (this.content) {
-      console.log("---------------");
+      console.log("\n---------------");
       console.log(" Current HOSTS ");
       console.log("---------------");
       console.log(this.content + "\n");
@@ -134,15 +134,15 @@ FlexHosts.prototype = {
   },
   restore: function (cb) {
     if (this.clear()) {
+      if (typeof cb != "function") {
+        cb = function () {};
+      }
+
       this.write(function() {
         if (sys.cmd instanceof Array && sys.cmd[1]) {
-          exec(sys.cmd[1], function() {
-            if (typeof cb == "function") {
-              cb();
-            }
-          });
+          exec(sys.cmd[1], cb);
         }
-        else if (typeof cb == "function") {
+        else {
           cb();
         }
       });
