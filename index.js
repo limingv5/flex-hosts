@@ -19,6 +19,7 @@ module.exports = function (param, dir) {
     return function() {
       if (wantoExit) {
         flexHosts.restore(function() {
+          console.log("Bye bye!");
           process.exit(0);
         });
         return;

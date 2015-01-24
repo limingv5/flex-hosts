@@ -1,14 +1,16 @@
 # FlexHosts
 
+> Support Mac OS X, Windows, Linux
+
 ```
 var flexHosts = require("flex-hosts");
 
-flexHosts(param, [dir]);
+flexHosts(hostsMap, [dir]);
 ```
 
 ## Arguments
 
-### param
+### hostsMap
 
 ```
 {
@@ -24,4 +26,4 @@ flexHosts(param, [dir]);
 
 ### [dir]
 
-The DIR where puts the config file
+The DIR where puts the hostsMap file
