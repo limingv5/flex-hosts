@@ -29,7 +29,7 @@ flexHosts(hostsMap, [dir]);
 The DIR where puts the hostsMap file
 
 
-## Implement in Mac OS X
+## How does it refresh DNS in Mac OS X?
 
 ### IF Yosemite
 ```
@@ -49,3 +49,5 @@ sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.pli
 ```
 sudo dscacheutil -flushcache
 ```
+
+So if you meet the situation that your computer is something wrong with remote host resolving, please repeat the command(s) above!
