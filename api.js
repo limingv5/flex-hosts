@@ -4,12 +4,6 @@ var Helper = require("./lib/helper");
 var sys = require("./lib/system");
 var exec = require("child_process").exec;
 
-function convert(str) {
-  return str.replace(/[\*\.\?\+\$\^\[\]\(\)\{\}\|\\\/]/g, function (all) {
-    return "\\"+all;
-  })
-}
-
 function FlexHosts(param, dir) {
   param = param || {};
   this.hosts = [];
@@ -103,7 +97,7 @@ FlexHosts.prototype = {
     if (fsLib.existsSync(sys.path)) {
       this.read();
       this.content = this.content.replace(
-        new RegExp("\\s{0,}" + convert(this.beginTag) + "[\\s\\S]*?" + convert(this.endTag) + "\\s{0,}", 'g'),
+        new RegExp("\\s{0,}" + Helper.str2regx(this.beginTag) + "[\\s\\S]*?" + Helper.str2regx(this.endTag) + "\\s{0,}", 'g'),
         ''
       );
 
