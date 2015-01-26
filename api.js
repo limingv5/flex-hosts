@@ -18,10 +18,12 @@ function FlexHosts(param, dir) {
 
     if (!fsLib.existsSync(confDir)) {
       Helper.mkdirPSync(confDir);
+      fsLib.chmod(confDir, 0777);
     }
 
     if (!fsLib.existsSync(confFile)) {
       fsLib.writeFileSync(confFile, JSON.stringify(Helper.clone(require("./lib/param")), null, 2), {encoding: "utf-8"});
+      fsLib.chmod(confFile, 0777);
     }
 
     try {
