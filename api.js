@@ -53,11 +53,15 @@ function FlexHosts(param, dir) {
     fsLib.watch(sys.path, function () {
       self.display();
       if (typeof sys.cmd == "string") {
-        exec(sys.cmd);
+        exec(sys.cmd, function() {
+          process.emit("reloaded");
+        });
       }
       else if (sys.cmd.length == 2) {
         exec(sys.cmd[0], function() {
-          exec(sys.cmd[1]);
+          exec(sys.cmd[1], function() {
+            process.emit("reloaded");
+          });
         });
       }
       else {
@@ -113,12 +117,8 @@ FlexHosts.prototype = {
       this.content += "\n\n" + this.beginTag + "\n" + this.hosts.join("\n") + "\n" + this.endTag;
     }
   },
-  write: function (cb) {
-    fsLib.writeFile(sys.path, this.content, function () {
-      if (typeof cb == "function") {
-        cb();
-      }
-    });
+  write: function () {
+    fsLib.writeFile(sys.path, this.content);
   },
   start: function () {
     if (this.clear()) {
@@ -127,19 +127,14 @@ FlexHosts.prototype = {
     }
   },
   restore: function (cb) {
-    if (this.clear()) {
-      if (typeof cb != "function") {
-        cb = function () {};
+    process.on("reloaded", function() {
+      if (typeof cb == "function") {
+        cb();
       }
+    });
 
-      this.write(function() {
-        if (sys.cmd instanceof Array && sys.cmd[1]) {
-          exec(sys.cmd[1], cb);
-        }
-        else {
-          cb();
-        }
-      });
+    if (this.clear()) {
+      this.write();
     }
   }
 };
