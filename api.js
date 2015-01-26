@@ -96,7 +96,12 @@ FlexHosts.prototype = {
   lines: function () {
     this.hosts = [];
     for (var host in this.param) {
-      this.hosts.push(host + "  " + this.param[host].join(' '));
+      if (typeof this.param[host] == "string") {
+        this.hosts.push(host + "  " + this.param[host]);
+      }
+      else if (this.param[host] instanceof Array && this.param[host].length) {
+        this.hosts.push(host + "  " + this.param[host].join(' '));
+      }
     }
   },
   clear: function () {

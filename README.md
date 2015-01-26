@@ -18,11 +18,11 @@ flexHosts(hostsMap, [dir]);
     "g.cdn.cn",
     "a.cdn.cn"
   ],
-  "127.0.0.2": [
-    "..."
-  ]
+  "127.0.0.2": "t.cdn.cn o.cdn.cn"
 }
 ```
+
+* The value relevant to key could be Array or String.
 
 ### [dir]
 
