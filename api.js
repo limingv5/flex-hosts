@@ -1,8 +1,10 @@
 var pathLib = require("path");
 var fsLib = require("fs");
+var util = require("util");
+var events = require("events");
+var exec = require("child_process").exec;
 var Helper = require("./lib/helper");
 var sys = require("./lib/system");
-var exec = require("child_process").exec;
 
 function FlexHosts(param, dir) {
   param = param || {};
@@ -49,49 +51,41 @@ function FlexHosts(param, dir) {
   }
 
   this.lines();
-
-  if (sys.path && sys.cmd) {
-    var self = this;
-    fsLib.watch(sys.path, function () {
-      self.display();
-      if (typeof sys.cmd == "string") {
-        exec(sys.cmd, function() {
-          process.emit("reloaded");
-        });
-      }
-      else if (sys.cmd.length == 2) {
-        exec(sys.cmd[0], function() {
-          exec(sys.cmd[1], function() {
-            process.emit("reloaded");
-          });
-        });
-      }
-      else {
-        console.log("Unknown Command!");
-      }
-    });
-
-    this.start();
-  }
-  else {
-    console.log("Your system has not been supported!");
-    process.exit(0);
-  }
+  this.start();
 };
-FlexHosts.prototype = {
+
+util.inherits(FlexHosts, events.EventEmitter);
+
+FlexHosts.prototype = Helper.merge(true, FlexHosts.prototype, {
   constructor: FlexHosts,
+  refresh: function() {
+    var self = this;
+
+    if (typeof sys.cmd == "string") {
+      exec(sys.cmd);
+    }
+    else if (sys.cmd instanceof Array && sys.cmd.length == 2) {
+      exec(sys.cmd[0], function() {
+        exec(sys.cmd[1], function() {
+          self.read();
+
+          if (self.content) {
+            console.log("\n---------------");
+            console.log(" Current HOSTS ");
+            console.log("---------------");
+            console.log(self.content + "\n");
+          }
+
+          self.emit("refreshed");
+        });
+      });
+    }
+    else {
+      console.log("Unknown Command!");
+    }
+  },
   read: function () {
     this.content = Helper.readFileInUTF8(sys.path);
-  },
-  display: function () {
-    this.read();
-
-    if (this.content) {
-      console.log("\n---------------");
-      console.log(" Current HOSTS ");
-      console.log("---------------");
-      console.log(this.content + "\n");
-    }
   },
   lines: function () {
     this.hosts = [];
@@ -125,7 +119,10 @@ FlexHosts.prototype = {
     }
   },
   write: function () {
-    fsLib.writeFile(sys.path, this.content);
+    var self = this;
+    fsLib.writeFile(sys.path, this.content, function() {
+      self.refresh();
+    });
   },
   start: function () {
     if (this.clear()) {
@@ -133,17 +130,13 @@ FlexHosts.prototype = {
       this.write();
     }
   },
-  restore: function (cb) {
-    process.on("reloaded", function() {
-      if (typeof cb == "function") {
-        cb();
-      }
-    });
-
+  restore: function () {
     if (this.clear()) {
       this.write();
     }
+
+    return this;
   }
-};
+});
 
 exports = module.exports = FlexHosts;
