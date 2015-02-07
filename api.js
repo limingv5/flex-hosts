@@ -50,6 +50,9 @@ function FlexHosts(param, dir) {
     this.param = param;
   }
 
+  this.read();
+  fsLib.writeFile(sys.path + ".backup", this.content);
+
   this.lines();
   this.start();
 };
@@ -58,15 +61,15 @@ util.inherits(FlexHosts, events.EventEmitter);
 
 FlexHosts.prototype = Helper.merge(true, FlexHosts.prototype, {
   constructor: FlexHosts,
-  refresh: function() {
+  refresh: function () {
     var self = this;
 
     if (typeof sys.cmd == "string") {
       exec(sys.cmd);
     }
     else if (sys.cmd instanceof Array && sys.cmd.length == 2) {
-      exec(sys.cmd[0], function() {
-        exec(sys.cmd[1], function() {
+      exec(sys.cmd[0], function () {
+        exec(sys.cmd[1], function () {
           self.read();
 
           if (self.content) {
@@ -120,7 +123,7 @@ FlexHosts.prototype = Helper.merge(true, FlexHosts.prototype, {
   },
   write: function () {
     var self = this;
-    fsLib.writeFile(sys.path, this.content, function() {
+    fsLib.writeFile(sys.path, this.content, function () {
       self.refresh();
     });
   },
