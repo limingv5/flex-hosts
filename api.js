@@ -11,11 +11,12 @@ var sys = require("./lib/system");
 function FlexHosts(param, dir) {
   param = param || {};
   this.host2ip = {};
-  this.hosts = [];
+  this.hostsFuncArr = [];
+  this.hostsTextArr = [];
   this.content = '';
 
   this.beginTag = "##### " + process.cwd() + " Begin #####";
-  this.endTag = "##### " + process.cwd() + " End #####";
+  this.endTag = "##### " + process.cwd() + " End   #####";
 
   if (dir) {
     var confFile = pathLib.join(process.cwd(), dir || ".config", pathLib.basename(__dirname) + ".json");
@@ -45,31 +46,22 @@ function FlexHosts(param, dir) {
 
   for (var host in this.param) {
     if (typeof this.param[host] == "string") {
-      this.hosts.push(host + "  " + this.param[host]);
-      this.add2map(this.param[host]);
+      this.hostsTextArr.push(host + "  " + this.param[host]);
+      this.hostfunc([this.param[host]]);
     }
     else if (util.isArray(this.param[host]) && this.param[host].length) {
-      this.hosts.push(host + "  " + this.param[host].join(' '));
-      for (var i = 0, len = this.param[host].length; i < len; i++) {
-        this.add2map(this.param[host][i]);
-      }
+      this.hostsTextArr.push(host + "  " + this.param[host].join(' '));
+      this.hostfunc(this.param[host]);
     }
   }
-  var IPS = [];
-  for (var host in this.host2ip) {
-    if (!this.host2ip[host]) {
-      IPS.push((function (host) {
-        return function (callback) {
-          dns.resolve4(host, function (e, address) {
-            callback(e, host, address[0]);
-          });
-        }
-      })(host));
-    }
-  }
-  async.parallel(IPS, (function (e, result) {
+  async.parallel(this.hostsFuncArr, (function (e, result) {
+    var host, ip;
     for (var i = 0, len = result.length; i < len; i++) {
-      this.host2ip[result[i][0]] = result[i][1];
+      host = result[i][0];
+      ip = result[i][1];
+      if (host && ip) {
+        this.host2ip[host] = ip;
+      }
     }
     console.log("\n-------------------");
     console.log(" MAP of host to IP ");
@@ -89,9 +81,15 @@ FlexHosts.prototype = Helper.merge(true, FlexHosts.prototype, {
   read: function () {
     this.content = Helper.readFileInUTF8(sys.path);
   },
-  add2map: function (host) {
-    if (typeof this.host2ip[host] == "undefined") {
-      this.host2ip[host] = '';
+  hostfunc: function (hosts) {
+    for (var i = 0, len = hosts.length; i < len; i++) {
+      this.hostsFuncArr.push((function (host) {
+        return function (callback) {
+          dns.resolve4(host, function (e, address) {
+            callback(e, host, address[0]);
+          });
+        }
+      })(hosts[i]));
     }
   },
   display: function () {
@@ -127,8 +125,8 @@ FlexHosts.prototype = Helper.merge(true, FlexHosts.prototype, {
     });
   },
   add: function() {
-    if (this.hosts.length) {
-      this.content += "\n\n" + this.beginTag + "\n" + this.hosts.join("\n") + "\n" + this.endTag;
+    if (this.hostsTextArr.length) {
+      this.content += "\n\n" + this.beginTag + "\n" + this.hostsTextArr.join("\n") + "\n" + this.endTag;
     }
   },
   clear: function () {
