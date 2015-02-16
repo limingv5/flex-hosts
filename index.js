@@ -8,17 +8,19 @@ module.exports = function (param, dir) {
     input: process.stdin,
     output: process.stdout
   });
-  rl.on("SIGINT", function() {
-    console.log("waiting...")
+  rl.on("SIGINT", function () {
+    console.log("waiting...");
     process.emit("SIGINT");
   });
 
   process.once("SIGINT", function () {
-    var task = flexHosts.restore();
-    task.on("refreshed", function() {
-      console.log("exit!")
+    flexHosts.restore();
+    flexHosts.on("refreshed", function () {
+      console.log("exit!");
       process.exit();
     });
   });
+
+  return flexHosts;
 };
 
