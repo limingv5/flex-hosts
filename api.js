@@ -85,8 +85,14 @@ FlexHosts.prototype = Helper.merge(true, FlexHosts.prototype, {
     for (var i = 0, len = hosts.length; i < len; i++) {
       this.hostsFuncArr.push((function (host) {
         return function (callback) {
-          dns.resolve4(host, function (e, address) {
-            callback(e, host, address[0]);
+          dns.resolve(host, function (e, address) {
+            if (e) {
+              console.log((e.hostname || host) + " can't be resolved!");
+              callback(e, host, null);
+            }
+            else {
+              callback(e, host, address[0]);
+            }
           });
         }
       })(hosts[i]));
@@ -124,7 +130,7 @@ FlexHosts.prototype = Helper.merge(true, FlexHosts.prototype, {
       }
     });
   },
-  add: function() {
+  add: function () {
     if (this.hostsTextArr.length) {
       this.content += "\n\n" + this.beginTag + "\n" + this.hostsTextArr.join("\n") + "\n" + this.endTag;
     }
