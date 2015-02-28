@@ -57,20 +57,18 @@ function FlexHosts(param, dir) {
   async.parallel(this.hostsFuncArr, (function (e, result) {
     var host, ip;
     for (var i = 0, len = result.length; i < len; i++) {
-      if (!result[i]) {
-        continue;
-      }
-
-      host = result[i][0];
-      ip = result[i][1];
-      if (host && ip && ip != "127.0.0.1") {
-        this.host2ip[host] = ip;
+      if (result[i]) {
+        host = result[i][0];
+        ip = result[i][1];
+        if (host && ip && ip != "127.0.0.1") {
+          this.host2ip[host] = ip;
+        }
       }
     }
     console.log("\n-------------------");
-    console.log(" MAP of host to IP ");
+    console.log(" MAP of host to IP");
     console.log("-------------------");
-    console.log(this.host2ip);
+    console.log("\x1b[37m%s\x1b[0m\n", JSON.stringify(this.host2ip, null, 2));
 
     this.start();
   }).bind(this));
@@ -91,11 +89,11 @@ FlexHosts.prototype = Helper.merge(true, FlexHosts.prototype, {
         return function (callback) {
           dns.resolve(host, function (e, address) {
             if (e) {
-              console.log((e.hostname || host) + " can't be resolved!");
-              callback(e, host, null);
+              console.log("Warning: \x1b[33m%s\x1b[0m can't be resolved!", e.hostname || host);
+              callback(null, host, null);
             }
             else {
-              callback(e, host, address[0]);
+              callback(null, host, address[0]);
             }
           });
         }
@@ -107,9 +105,9 @@ FlexHosts.prototype = Helper.merge(true, FlexHosts.prototype, {
 
     if (this.content) {
       console.log("\n---------------");
-      console.log(" Current HOSTS ");
+      console.log(" Current HOSTS");
       console.log("---------------");
-      console.log(this.content + "\n");
+      console.log("\x1b[37m%s\x1b[0m\n", this.content);
     }
 
     this.emit("refreshed", this.host2ip);

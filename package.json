@@ -1,6 +1,6 @@
 {
   "name": "flex-hosts",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "hosts manager with DNS refresh",
   "main": "index.js",
   "scripts": {
