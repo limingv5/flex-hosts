@@ -57,9 +57,13 @@ function FlexHosts(param, dir) {
   async.parallel(this.hostsFuncArr, (function (e, result) {
     var host, ip;
     for (var i = 0, len = result.length; i < len; i++) {
+      if (!result[i]) {
+        continue;
+      }
+
       host = result[i][0];
       ip = result[i][1];
-      if (host && ip) {
+      if (host && ip && ip != "127.0.0.1") {
         this.host2ip[host] = ip;
       }
     }
