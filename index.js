@@ -1,6 +1,14 @@
 var FlexHosts = require("./api");
 var readLine = require("readline");
 
+try {
+  var updateNotifier = require("update-notifier");
+  var pkg = require(__dirname + "/package.json");
+  updateNotifier({pkg: pkg}).notify();
+}
+catch (e) {
+}
+
 module.exports = function (param, dir) {
   var flexHosts = new FlexHosts(param, dir);
 
