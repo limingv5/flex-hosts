@@ -6,7 +6,6 @@ var events = require("events");
 var exec = require("child_process").exec;
 var async = require("async");
 var mkdirp = require("mkdirp");
-var merge = require("merge");
 var sys = require("./lib/system");
 
 function str2regx (str) {
@@ -35,12 +34,21 @@ function FlexHosts(param, dir) {
     }
 
     if (!fsLib.existsSync(confFile)) {
-      fsLib.writeFileSync(confFile, JSON.stringify(merge(true, require("./lib/param")), null, 2), {encoding: "utf-8"});
+      fsLib.writeFileSync(confFile, JSON.stringify(require("./lib/param"), null, 2), {encoding: "utf-8"});
       fsLib.chmod(confFile, 0777);
     }
 
     try {
-      this.param = merge(JSON.parse(fsLib.readFileSync(confFile)), param);
+      this.param = JSON.parse(fsLib.readFileSync(confFile));
+
+      for (var ip in param) {
+        if (this.param[ip]) {
+          this.param[ip] = this.param[ip].concat(param[ip]);
+        }
+        else {
+          this.param[ip] = param[ip];
+        }
+      }
     }
     catch (e) {
       console.log("Params Error!");
@@ -93,7 +101,7 @@ function FlexHosts(param, dir) {
 
 util.inherits(FlexHosts, events.EventEmitter);
 
-FlexHosts.prototype = merge.recursive(true, FlexHosts.prototype, {
+var prototype = {
   constructor: FlexHosts,
   read: function () {
     this.content = fsLib.readFileSync(sys.path, "utf-8");
@@ -180,6 +188,10 @@ FlexHosts.prototype = merge.recursive(true, FlexHosts.prototype, {
       this.write();
     }
   }
-});
+};
+
+for (var k in prototype) {
+  FlexHosts.prototype[k] = prototype[k];
+}
 
 exports = module.exports = FlexHosts;
