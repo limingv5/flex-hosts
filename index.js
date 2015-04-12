@@ -17,8 +17,20 @@ try {
 catch (e) {
 }
 
-module.exports = function (param, dir) {
-  var flexHosts = new FlexHosts(param, dir);
+module.exports = function (param, dir, cb) {
+  param = param || {};
+
+  if (typeof dir == "function") {
+    cb = dir;
+    dir = null;
+  }
+  else if (typeof cb != "function") {
+    cb = function (host2ip) {
+      console.log(host2ip);
+    };
+  }
+
+  var flexHosts = new FlexHosts(param, dir, cb);
 
   var rl = readLine.createInterface({
     input: process.stdin,

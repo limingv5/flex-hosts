@@ -8,14 +8,14 @@ var async = require("async");
 var mkdirp = require("mkdirp");
 var sys = require("./lib/system");
 
-function str2regx (str) {
+function str2regx(str) {
   return str.replace(/[\*\.\?\+\$\^\[\]\(\)\{\}\|\\\/]/g, function (all) {
-    return "\\"+all;
+    return "\\" + all;
   });
 }
 
-function FlexHosts(param, dir) {
-  param = param || {};
+function FlexHosts(param, dir, cb) {
+  this.cb = cb;
   this.host2ip = {};
   this.hostsFuncArr = [];
   this.hostsTextArr = [];
@@ -123,7 +123,7 @@ var prototype = {
       })(hosts[i]));
     }
   },
-  display: function () {
+  finish: function (isCallback) {
     this.read();
 
     if (this.content) {
@@ -133,20 +133,25 @@ var prototype = {
       console.log("\x1b[37m%s\x1b[0m\n", this.content);
     }
 
-    this.emit("refreshed", this.host2ip);
+    if (isCallback) {
+      this.cb(this.host2ip);
+    }
+    else {
+      this.emit("refreshed", this.host2ip);
+    }
   },
-  write: function () {
+  write: function (isCallback) {
     var self = this;
     fsLib.writeFile(sys.path, this.content, function () {
       if (typeof sys.cmd == "string") {
         exec(sys.cmd, function () {
-          self.display();
+          self.finish(isCallback);
         });
       }
       else if (util.isArray(sys.cmd) && sys.cmd.length == 2) {
         exec(sys.cmd[0], function () {
           exec(sys.cmd[1], function () {
-            self.display();
+            self.finish(isCallback);
           });
         });
       }
@@ -180,12 +185,12 @@ var prototype = {
   start: function () {
     if (this.clear()) {
       this.add();
-      this.write();
+      this.write(true);
     }
   },
   restore: function () {
     if (this.clear()) {
-      this.write();
+      this.write(false);
     }
   }
 };
