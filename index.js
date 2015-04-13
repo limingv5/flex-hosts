@@ -25,8 +25,13 @@ module.exports = function (param, dir, cb) {
     dir = null;
   }
   else if (typeof cb != "function") {
-    cb = function (host2ip) {
-      console.log(host2ip);
+    cb = function (err, host2ip) {
+      if (err) {
+        console.log(err);
+      }
+      else {
+        console.log(host2ip);
+      }
     };
   }
 

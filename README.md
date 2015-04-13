@@ -5,7 +5,7 @@
 ```
 var flexHosts = require("flex-hosts");
 
-flexHosts(hostsMap, [dir,] function (hosts) {
+flexHosts(hostsMap, [dir,] function (err, hosts) {
   ...
 });
 ```

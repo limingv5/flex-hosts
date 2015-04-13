@@ -71,8 +71,8 @@ function FlexHosts(param, dir, cb) {
   }
 
   dns.lookup("ju.taobao.com", function (err) {
-    if (err && err.code == "ENOTFOUND") {
-      this.start();
+    if (err) {
+      this.start(err);
     }
     else {
       async.parallel(this.hostsFuncArr, (function (e, result) {
@@ -91,7 +91,7 @@ function FlexHosts(param, dir, cb) {
         console.log("-------------------");
         console.log("\x1b[37m%s\x1b[0m\n", JSON.stringify(this.host2ip, null, 2));
 
-        this.start();
+        this.start(null);
       }).bind(this));
     }
   }.bind(this));
@@ -134,7 +134,7 @@ var prototype = {
     }
 
     if (isCallback) {
-      this.cb(this.host2ip);
+      this.cb(null, this.host2ip);
     }
     else {
       this.emit("refreshed", this.host2ip);
@@ -182,8 +182,11 @@ var prototype = {
       return false;
     }
   },
-  start: function () {
-    if (this.clear()) {
+  start: function (err) {
+    if (err) {
+      this.cb(err, this.host2ip);
+    }
+    else if (this.clear()) {
       this.add();
       this.write(true);
     }
