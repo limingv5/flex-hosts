@@ -59,14 +59,22 @@ function FlexHosts(param, dir, cb) {
     this.param = param;
   }
 
+  var hostList;
   for (var host in this.param) {
+    hostList = [];
     if (typeof this.param[host] == "string") {
-      this.hostsTextArr.push(host + "  " + this.param[host]);
-      this.hostfunc([this.param[host]]);
+      hostList = this.param[host].split(/\s{1,}/g);
     }
     else if (util.isArray(this.param[host]) && this.param[host].length) {
-      this.hostsTextArr.push(host + "  " + this.param[host].join(' '));
-      this.hostfunc(this.param[host]);
+      hostList = this.param[host];
+      hostList = hostList.filter(function (elem, pos) {
+        return hostList.indexOf(elem) == pos;
+      });
+    }
+
+    if (hostList && hostList.length) {
+      this.hostsTextArr.push(host + "  " + hostList.join(' '));
+      this.hostfunc(hostList);
     }
   }
 
@@ -137,7 +145,7 @@ var prototype = {
       this.cb(null, this.host2ip);
     }
     else {
-      this.emit("refreshed", this.host2ip);
+      this.emit("refreshed");
     }
   },
   write: function (isCallback) {
