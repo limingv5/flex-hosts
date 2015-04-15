@@ -1,23 +1,22 @@
-var FlexHosts = require("./api");
-var readLine = require("readline");
-
-try {
+var isCLI = (process.title == "node");
+if (isCLI) {
   var pkg = require(__dirname + "/package.json");
 
   require("check-update")({
     packageName: pkg.name,
     packageVersion: pkg.version,
-    isCLI: process.title == "node"
+    isCLI: isCLI
   }, function (err, latestVersion, defaultMessage) {
     if (!err && pkg.version < latestVersion) {
       console.log(defaultMessage);
     }
   });
 }
-catch (e) {
-}
 
 module.exports = function (param, dir, cb) {
+  var FlexHosts = require("./api");
+  var readLine = require("readline");
+
   param = param || {};
 
   if (typeof dir == "function") {
@@ -42,18 +41,26 @@ module.exports = function (param, dir, cb) {
     output: process.stdout
   });
   rl.on("SIGINT", function () {
-    console.log("waiting...");
     process.emit("SIGINT");
   });
 
-  process.once("SIGINT", function () {
-    flexHosts.restore();
-    flexHosts.on("refreshed", function () {
-      console.log("exit!");
-      process.exit();
-    });
-  });
+  process.on("SIGINT", (function (i) {
+    return function() {
+      switch (i) {
+        case 0:
+          console.log("\n\x1b[35m%s\x1b[0m", "Press Control-C again to exit.");
+          i++;
+          break;
+        case 1:
+          console.log("Exiting...");
+          flexHosts.restore();
+          i++;
+          break;
+        default:
+          console.log("Waiting...");
+      }
+    }
+  })(0));
 
   return flexHosts;
 };
-

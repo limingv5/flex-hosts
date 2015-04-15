@@ -131,7 +131,7 @@ var prototype = {
       })(hosts[i]));
     }
   },
-  finish: function (isCallback) {
+  finish: function (isStart) {
     this.read();
 
     if (this.content) {
@@ -141,25 +141,26 @@ var prototype = {
       console.log("\x1b[37m%s\x1b[0m\n", this.content);
     }
 
-    if (isCallback) {
+    if (isStart) {
       this.cb(null, this.host2ip);
     }
     else {
-      this.emit("refreshed");
+      console.log("\x1b[32m%s\x1b[0m\n", "Bye-bye!");
+      process.exit();
     }
   },
-  write: function (isCallback) {
+  write: function (isStart) {
     var self = this;
     fsLib.writeFile(sys.path, this.content, function () {
       if (typeof sys.cmd == "string") {
         exec(sys.cmd, function () {
-          self.finish(isCallback);
+          self.finish(isStart);
         });
       }
       else if (util.isArray(sys.cmd) && sys.cmd.length == 2) {
         exec(sys.cmd[0], function () {
           exec(sys.cmd[1], function () {
-            self.finish(isCallback);
+            self.finish(isStart);
           });
         });
       }
