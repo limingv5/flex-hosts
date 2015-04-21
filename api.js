@@ -1,11 +1,9 @@
-var pathLib = require("path");
 var fsLib = require("fs");
 var dns = require("dns");
 var util = require("util");
 var events = require("events");
 var exec = require("child_process").exec;
 var async = require("async");
-var mkdirp = require("mkdirp");
 var sys = require("./lib/system");
 
 function str2regx(str) {
@@ -14,7 +12,7 @@ function str2regx(str) {
   });
 }
 
-function FlexHosts(param, dir, cb) {
+function FlexHosts(param, confFile, cb) {
   this.cb = cb;
   this.host2ip = {};
   this.hostsFuncArr = [];
@@ -24,15 +22,7 @@ function FlexHosts(param, dir, cb) {
   this.beginTag = "##### " + process.cwd() + " Begin #####";
   this.endTag = "##### " + process.cwd() + " End   #####";
 
-  if (dir) {
-    var confFile = pathLib.join(process.cwd(), dir || ".config", pathLib.basename(__dirname) + ".json");
-    var confDir = pathLib.dirname(confFile);
-
-    if (!fsLib.existsSync(confDir)) {
-      mkdirp.sync(confDir);
-      fsLib.chmod(confDir, 0777);
-    }
-
+  if (confFile) {
     if (!fsLib.existsSync(confFile)) {
       fsLib.writeFileSync(confFile, JSON.stringify(require("./lib/param"), null, 2), {encoding: "utf-8"});
       fsLib.chmod(confFile, 0777);
@@ -177,7 +167,12 @@ var prototype = {
   clear: function () {
     if (fsLib.existsSync(sys.path)) {
       this.read();
-      fsLib.writeFile(sys.path + ".backup", this.content);
+
+      try {
+        fsLib.writeFileSync(sys.path + ".backup", this.content);
+      }
+      catch (e) {}
+
 
       this.content = this.content.replace(
         new RegExp("\\s{0,}" + str2regx(this.beginTag) + "[\\s\\S]*?" + str2regx(this.endTag) + "\\s{0,}", 'g'),

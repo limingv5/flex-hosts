@@ -1,7 +1,6 @@
 var isCLI = (process.title == "node");
 if (isCLI) {
   var pkg = require(__dirname + "/package.json");
-
   require("check-update")({
     packageName: pkg.name,
     packageVersion: pkg.version,
@@ -16,6 +15,9 @@ if (isCLI) {
 module.exports = function (param, dir, cb) {
   var FlexHosts = require("./api");
   var readLine = require("readline");
+  var pathLib = require("path");
+  var fsLib = require("fs");
+  var mkdirp = require("mkdirp");
 
   param = param || {};
 
@@ -34,7 +36,33 @@ module.exports = function (param, dir, cb) {
     };
   }
 
-  var flexHosts = new FlexHosts(param, dir, cb);
+  var confDir, confFile, json = pathLib.basename(__dirname) + ".json";
+  if (dir) {
+    if (dir.indexOf('/') == 0 || /^\w{1}:[\\/].*$/.test(dir)) {
+      if (/\.json$/.test(dir)) {
+        confFile = dir;
+        confDir = pathLib.dirname(confFile);
+      }
+      else {
+        confDir = dir;
+        confFile = pathLib.join(confDir, json);
+      }
+    }
+    else {
+      confDir = pathLib.join(process.cwd(), dir);
+      confFile = pathLib.join(confDir, json);
+    }
+
+    if (!fsLib.existsSync(confDir)) {
+      mkdirp.sync(confDir);
+      fsLib.chmod(confDir, 0777);
+    }
+  }
+  else {
+    confFile = null;
+  }
+
+  var flexHosts = new FlexHosts(param, confFile, cb);
 
   var rl = readLine.createInterface({
     input: process.stdin,
