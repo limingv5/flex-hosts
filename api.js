@@ -1,4 +1,6 @@
 var fsLib = require("fs");
+var urlLib = require("url");
+var querystring = require("querystring");
 var dns = require("dns");
 var net = require("net");
 var util = require("util");
@@ -209,7 +211,8 @@ FlexHosts.prototype = {
 
       serverIP = serverIP || req.headers.host;
       var clientIP = req.connection.remoteAddress.replace(/.+\:/, '');
-      var queryCIP = req.query.client;
+      var Q = urlLib.parse(req.url).query;
+      var queryCIP = Q ? querystring.parse(Q).client : null;
 
       if (["localhost", "127.0.0.1", clientIP].indexOf(serverIP) != -1) {
         if (queryCIP && net.isIP(queryCIP)) {
