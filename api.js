@@ -1,10 +1,11 @@
 var fsLib = require("fs");
 var dns = require("dns");
+var net = require("net");
 var util = require("util");
-var events = require("events");
 var exec = require("child_process").exec;
 var async = require("async");
 var sys = require("./lib/system");
+var Router = require("./lib/router");
 
 function str2regx(str) {
   return str.replace(/[\*\.\?\+\$\^\[\]\(\)\{\}\|\\\/]/g, function (all) {
@@ -95,11 +96,9 @@ function FlexHosts(param, confFile, cb) {
   }.bind(this));
 
   return this;
-};
+}
 
-util.inherits(FlexHosts, events.EventEmitter);
-
-var prototype = {
+FlexHosts.prototype = {
   constructor: FlexHosts,
   read: function () {
     this.content = fsLib.readFileSync(sys.path, "utf-8");
@@ -171,8 +170,8 @@ var prototype = {
       try {
         fsLib.writeFileSync(sys.path + ".backup", this.content);
       }
-      catch (e) {}
-
+      catch (e) {
+      }
 
       this.content = this.content.replace(
         new RegExp("\\s{0,}" + str2regx(this.beginTag) + "[\\s\\S]*?" + str2regx(this.endTag) + "\\s{0,}", 'g'),
@@ -199,11 +198,45 @@ var prototype = {
     if (this.clear()) {
       this.write(false);
     }
+  },
+  cloudHosts: function (serverIP) {
+    var self = this;
+
+    return function (req, res) {
+      res.writeHead(200, {
+        "Content-Type": "text/html"
+      });
+
+      serverIP = serverIP || req.headers.host;
+      var clientIP = req.connection.remoteAddress.replace(/.+\:/, '');
+      var queryCIP = req.query.client;
+
+      if (["localhost", "127.0.0.1", clientIP].indexOf(serverIP) != -1) {
+        if (queryCIP && net.isIP(queryCIP)) {
+          clientIP = queryCIP;
+        }
+        else {
+          res.end("Forbidden!");
+          return;
+        }
+      }
+
+      var addressList = [], host2ip = self.host2ip;
+      for (var k in host2ip) {
+        if (addressList.indexOf(host2ip[k]) == -1) {
+          addressList.push(host2ip[k]);
+        }
+      }
+
+      var router = new Router(serverIP, clientIP, addressList);
+      router.on("error", function () {
+        res.end("Error!");
+      });
+      router.on("success", function () {
+        res.end("Success!");
+      });
+    }
   }
 };
-
-for (var k in prototype) {
-  FlexHosts.prototype[k] = prototype[k];
-}
 
 exports = module.exports = FlexHosts;
