@@ -1,13 +1,9 @@
 var fsLib = require("fs");
-var urlLib = require("url");
-var querystring = require("querystring");
 var dns = require("dns");
-var net = require("net");
 var util = require("util");
 var exec = require("child_process").exec;
 var async = require("async");
 var sys = require("./lib/system");
-var Router = require("./lib/router");
 
 function str2regx(str) {
   return str.replace(/[\*\.\?\+\$\^\[\]\(\)\{\}\|\\\/]/g, function (all) {
@@ -199,46 +195,6 @@ FlexHosts.prototype = {
   restore: function () {
     if (this.clear()) {
       this.write(false);
-    }
-  },
-  cloudHosts: function (serverIP) {
-    var self = this;
-
-    return function (req, res) {
-      res.writeHead(200, {
-        "Content-Type": "text/html"
-      });
-
-      serverIP = serverIP || req.headers.host;
-      var clientIP = req.connection.remoteAddress.replace(/.+\:/, '');
-      clientIP = (net.isIP(clientIP) && clientIP != "127.0.0.1") ? clientIP : serverIP;
-      var Q = urlLib.parse(req.url).query;
-      var queryCIP = Q ? querystring.parse(Q).client : null;
-
-      if (["localhost", "127.0.0.1", clientIP].indexOf(serverIP) != -1) {
-        if (queryCIP && net.isIP(queryCIP) && ["localhost", "127.0.0.1"].indexOf(queryCIP) == -1) {
-          clientIP = queryCIP;
-        }
-        else {
-          res.end("Forbidden!");
-          return;
-        }
-      }
-
-      var addressList = [], host2ip = self.host2ip;
-      for (var k in host2ip) {
-        if (addressList.indexOf(host2ip[k]) == -1) {
-          addressList.push(host2ip[k]);
-        }
-      }
-
-      var router = new Router(serverIP, clientIP, addressList);
-      router.on("error", function () {
-        res.end("Error!");
-      });
-      router.on("success", function () {
-        res.end("Success!");
-      });
     }
   }
 };
