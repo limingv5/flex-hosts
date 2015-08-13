@@ -1,17 +1,3 @@
-var isCLI = (process.title == "node");
-if (isCLI) {
-  var pkg = require(__dirname + "/package.json");
-  require("check-update")({
-    packageName: pkg.name,
-    packageVersion: pkg.version,
-    isCLI: isCLI
-  }, function (err, latestVersion, defaultMessage) {
-    if (!err && pkg.version < latestVersion) {
-      console.log(defaultMessage);
-    }
-  });
-}
-
 module.exports = function (param, dir, cb) {
   var FlexHosts = require("./api");
   var readLine = require("readline");

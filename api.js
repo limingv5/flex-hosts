@@ -6,9 +6,7 @@ var async = require("async");
 var sys = require("./lib/system");
 
 function str2regx(str) {
-  return str.replace(/[\*\.\?\+\$\^\[\]\(\)\{\}\|\\\/]/g, function (all) {
-    return "\\" + all;
-  });
+  return str.replace(/[\\\^\$\*\+\?\|\[\]\(\)\.\{\}]/g, "\\$&");
 }
 
 function FlexHosts(param, confFile, cb) {
