@@ -1,4 +1,4 @@
-var FlexHosts = require("../api");
+var FlexHosts = require("../index.js");
 var param = require("../lib/param");
 
 var flexHosts = new FlexHosts(param);
