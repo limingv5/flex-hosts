@@ -1,4 +1,4 @@
-module.exports = function (param, dir, cb) {
+module.exports = function (param, dir, cb, isGroup) {
   var FlexHosts = require("./api");
   var readLine = require("readline");
   var pathLib = require("path");
@@ -6,18 +6,24 @@ module.exports = function (param, dir, cb) {
   var mkdirp = require("mkdirp");
 
   param = param || {};
-
+  isGroup = isGroup || false;
   if (typeof dir == "function") {
     cb = dir;
     dir = null;
   }
-  else if (typeof cb != "function") {
+  if (typeof dir == 'boolean') {
+    isGroup = dir;
+    cb = null;
+    dir = null;
+  }
+
+  if (typeof cb != "function") {
     cb = function (err, host2ip) {
       if (err) {
         console.log(err);
       }
       else {
-        console.log(host2ip);
+        console.log('callback',host2ip);
       }
     };
   }
@@ -47,8 +53,7 @@ module.exports = function (param, dir, cb) {
   else {
     confFile = null;
   }
-
-  var flexHosts = new FlexHosts(param, confFile, cb);
+  var flexHosts = new FlexHosts(param, confFile, cb, isGroup);
 
   var rl = readLine.createInterface({
     input: process.stdin,
@@ -75,6 +80,9 @@ module.exports = function (param, dir, cb) {
       }
     }
   })(0));
-
+  process.on('uncaughtException', function (err) {
+    cb && cb(err);
+    flexHosts.restore();
+  })
   return flexHosts;
 };
