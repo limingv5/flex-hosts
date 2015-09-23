@@ -23,6 +23,7 @@ function addComment(param){
 }
 function FlexHosts(param, confFile, cb , isGroup) {
   this.param = '';
+  this.confFile = confFile;
   this.content = '';
   this.cb = cb;
   this.errTimes = 0;
@@ -31,7 +32,6 @@ function FlexHosts(param, confFile, cb , isGroup) {
   this.beginTag = "##### " + process.cwd() + " Begin #####";
   this.endTag = "##### " + process.cwd() + " End   #####";
   this.backup = this.read();
-  this.hostFile = confFile || './lib/param.js';
   this.hostReg = new RegExp("\\s{0,}" + str2regx(this.beginTag) + "[\\s\\S]*?" + str2regx(this.endTag) + "\\s{0,}", 'g');
 
   if (confFile) {
@@ -225,8 +225,13 @@ FlexHosts.prototype = {
     self.isFree = false;
     fsLib.writeFileSync(sys.path, data);
     //将修改存入param.js
+
     self.param = self._parse(self.content.trim());
-    fsLib.writeFileSync(self.hostFile,"moudle.exports = "+JSON.stringify(self.param));
+
+    if (self.confFile) {
+      fsLib.writeFileSync(self.confFile, JSON.stringify(self.param, null, 2));
+      fsLib.chmod(self.confFile, 0777);
+    }
 
     async.series([self._reload.bind(self),self.map.bind(self)],function(err,result){
       if (err){
