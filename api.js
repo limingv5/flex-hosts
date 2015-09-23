@@ -307,8 +307,8 @@ FlexHosts.prototype = {
       }
       //还原文件
       content = content.replace(this.hostReg,'')
-                       .replace(str2regx('##your comment##  '),'')
-                       .replace(str2regx('##flex-hosts comment##  '),'');
+                       .replace('##your comment##','')
+                       .replace('##flex-hosts comment##','').trim();
       try {
         fsLib.writeFileSync(sys.path, content);
       }
