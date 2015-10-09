@@ -1,6 +1,6 @@
 {
   "name": "flex-hosts",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "hosts manager with DNS refresh",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "refresh"
   ],
   "dependencies": {
-    "async": "~0.9.0",
-    "mkdirp": "~0.5.0"
+    "async": "~1.4.2",
+    "mkdirp": "~0.5.1"
   }
 }
