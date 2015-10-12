@@ -23,6 +23,7 @@ function addComment(param){
 }
 function FlexHosts(param, confFile, cb , isGroup) {
   this.param = '';
+  this.confFile = confFile;
   this.content = '';
   this.cb = cb;
   this.errTimes = 0;
