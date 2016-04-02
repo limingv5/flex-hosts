@@ -5,9 +5,25 @@ var exec = require("child_process").exec;
 var async = require("async");
 var sys = require("./lib/system");
 
-function str2regx(str) {
+var DNSLookup = function(domain, timeout, callback) {
+  var callbackCalled = false;
+  var doCallback = function(err, domains) {
+    if (!callbackCalled) {
+      callbackCalled = true;
+      callback(err, domains);
+    }
+  };
+
+  setTimeout(function() {
+    doCallback(new Error("Timeout exceeded"), null);
+  }, timeout);
+
+  dns.resolve(domain, doCallback);
+};
+
+var str2regx = function(str) {
   return str.replace(/[\\\^\$\*\+\?\|\[\]\(\)\.\{\}]/g, "\\$&");
-}
+};
 
 function FlexHosts(param, confFile, cb) {
   this.cb = cb;
@@ -65,7 +81,7 @@ function FlexHosts(param, confFile, cb) {
     }
   }
 
-  dns.lookup("ju.taobao.com", function (err) {
+  DNSLookup("ju.taobao.com", 1000, function (err) {
     if (err) {
       this.start(err);
     }
@@ -103,7 +119,7 @@ FlexHosts.prototype = {
     for (var i = 0, len = hosts.length; i < len; i++) {
       this.hostsFuncArr.push((function (host) {
         return function (callback) {
-          dns.resolve(host, function (e, address) {
+          DNSLookup(host, 1000, function(e, address) {
             if (e) {
               console.log("Warning: \x1b[33m%s\x1b[0m can't be resolved!", e.hostname || host);
               callback(null, host, null);
