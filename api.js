@@ -172,7 +172,7 @@ FlexHosts.prototype = {
   },
   add: function () {
     if (this.hostsTextArr.length) {
-      this.content += "\n\n" + this.beginTag + "\n" + this.hostsTextArr.join("\n") + "\n" + this.endTag;
+      this.content = this.beginTag + "\n" + this.hostsTextArr.join("\n") + "\n" + this.endTag + "\n\n" + this.content;
     }
   },
   clear: function () {
