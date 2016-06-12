@@ -81,7 +81,7 @@ function FlexHosts(param, confFile, cb) {
     }
   }
 
-  DNSLookup("ju.taobao.com", 1500, function (err) {
+  DNSLookup("ju.taobao.com", 5000, function (err) {
     if (err) {
       this.start(err);
     }
@@ -119,7 +119,7 @@ FlexHosts.prototype = {
     for (var i = 0, len = hosts.length; i < len; i++) {
       this.hostsFuncArr.push((function (host) {
         return function (callback) {
-          DNSLookup(host, 1500, function(e, address) {
+          DNSLookup(host, 5000, function(e, address) {
             if (e) {
               console.log("Warning: \x1b[33m%s\x1b[0m can't be resolved!", e.hostname || host);
               callback(null, host, null);
