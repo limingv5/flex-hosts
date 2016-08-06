@@ -12,9 +12,13 @@ var DNSLookup = function(domain, timeout, callback) {
       callbackCalled = true;
       callback(err, domains);
     }
+    else {
+      clearTimeout(t);
+      t = null;
+    }
   };
 
-  setTimeout(function() {
+  var t = setTimeout(function() {
     doCallback(new Error("Timeout exceeded"), null);
   }, timeout);
 
