@@ -22,7 +22,7 @@ module.exports = function (param, dir, cb) {
     };
   }
 
-  var confDir, confFile, json = pathLib.basename(__dirname) + ".json";
+  var confDir, confFile, json = "flex-hosts.json";
   if (dir) {
     if (dir.indexOf('/') == 0 || /^\w{1}:[\\/].*$/.test(dir)) {
       if (/\.json$/.test(dir)) {
